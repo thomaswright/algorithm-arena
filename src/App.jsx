@@ -51,6 +51,8 @@ const main = () => {
     });
   }, []);
 
+  let reversed = [...readmes].reverse();
+
   return (
     <div className="bg-slate-100 text-slate-900 min-h-screen">
       <div className="max-w-xl pt-6">
@@ -65,7 +67,7 @@ const main = () => {
           <a href="https://github.com/vjeux">{"@vjeux"}</a>
         </div>
 
-        {readmes.reverse().map((readme) => {
+        {reversed.map((readme) => {
           if (readme) {
             let [url, content] = readme;
             let contentParsed = marked.parse(content);

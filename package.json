@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "type": "module",
   "description": "A weekly programming challenge series by [vjeux](https://github.com/vjeux).",
+  "homepage": "https://thomaswright.github.io/algorithm-arena",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "vite",
