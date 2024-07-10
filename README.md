@@ -147,3 +147,15 @@ https://github.com/Algorithm-Arena/weekly-challenge-23-unconventional-randomness
 Implement a program that makes a character go up stairs as the user is pressing right.
 
 https://github.com/Algorithm-Arena/weekly-challenge-24-stairs-animations
+
+## #25 - Grid Group
+
+Implement a program that generates a grid view of various groups of elements
+
+https://github.com/Algorithm-Arena/weekly-challenge-25-grid-group
+
+## #26 - Loser Tournament
+
+Implement a program that simulates a tournament where the worst players have a chance of winning.
+
+https://github.com/Algorithm-Arena/weekly-challenge-26-loser-tournament
