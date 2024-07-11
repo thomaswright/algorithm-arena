@@ -10,6 +10,33 @@ function objectValues(obj) {
   });
 }
 
+function getElementByText(text, tag, dom) {
+  const elements = dom.querySelectorAll(tag);
+  for (let element of elements) {
+    if (element.textContent.includes(text)) {
+      return element;
+    }
+  }
+  return null;
+}
+
+function substringBetween(mainString, substringA, substringB) {
+  let indexA = mainString.indexOf(substringA);
+  if (indexA === -1) return "";
+
+  let indexB = mainString.indexOf(substringB, indexA + substringA.length);
+  if (indexB === -1) return "";
+
+  return mainString.substring(indexA + substringA.length, indexB);
+}
+
+function getFirstUsername(str) {
+  const regex = /@([^\s.,!?;:]+)/;
+  const match = str.match(regex);
+
+  return match ? match[1] : null;
+}
+
 const main = () => {
   let [readmes, setReadmes] = React.useState({});
 
@@ -63,6 +90,7 @@ const main = () => {
         </div>
 
         {sorted.map(({ content, url }) => {
+          console.log(url);
           let contentParsed = marked.parse(content);
           var contentDom = new DOMParser().parseFromString(
             contentParsed,
@@ -71,6 +99,16 @@ const main = () => {
 
           const title = contentDom.querySelector("h1");
           const paragraph = contentDom.querySelector("p");
+
+          const winnerList = substringBetween(
+            content,
+            "### Winner",
+            "### Prizes"
+          )
+            .split("*")
+            .map((li) => getFirstUsername(li));
+
+          console.log(winnerList);
 
           return (
             <div key={url} className="pb-10 px-6">
