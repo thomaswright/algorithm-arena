@@ -1,34 +1,8 @@
 import React, { useEffect } from "react";
 import { marked } from "marked";
 
-let staticRepoList = [
-  "weekly-challenge-1-stockfish-chess",
-  "weekly-challenge-2-double-lines",
-  "weekly-challenge-3-bouncy-form",
-  "weekly-challenge-4-encrypted-thread",
-  "weekly-challenge-5-copy-pasta",
-  "weekly-challenge-6-pretty-shape",
-  "weekly-challenge-7-scores-timeline",
-  "weekly-challenge-8-ultimate-tic-tac-toe",
-  "weekly-challenge-9-dragon-ball",
-  "weekly-challenge-10-password-generator",
-  "weekly-challenge-11-mini-code-golf",
-  "weekly-challenge-12-fools-cursor",
-  "weekly-challenge-13-three-body-eclipse",
-  "weekly-challenge-14-lightbulb-coin",
-  "weekly-challenge-15-cactus-generator",
-  "weekly-challenge-16-branded-qrcode",
-  "weekly-challenge-17-karaoke-box",
-  "weekly-challenge-18-vc-simulator",
-  "weekly-challenge-19-falling-breakout",
-  "weekly-challenge-20-extravagant-button",
-  "weekly-challenge-21-unconventional-clock",
-  "weekly-challenge-22-concert-effects",
-  "weekly-challenge-23-unconventional-randomness",
-  "weekly-challenge-24-stairs-animations",
-  "weekly-challenge-25-grid-group",
-  "weekly-challenge-26-loser-tournament",
-].map((name) => ({ name }));
+let repoListGistUrl =
+  "https://gist.githubusercontent.com/thomaswright/06e827401a84cd949997b56de8a0e345/raw/6c91045fc9acb0f25f04a75d9062f8947d7cddfd/algorithm-arena-repos.json";
 
 function isEmptyObject(obj) {
   return Object.keys(obj).length === 0;
@@ -108,7 +82,7 @@ const main = () => {
 
   useEffect(() => {
     let fetchRepoReadmes = (repoList) =>
-      repoList.map(({ name }) => {
+      repoList.map((name) => {
         let repoNumber = name.split("-")[2];
         let readmeUrl = `https://raw.githubusercontent.com/Algorithm-Arena/${name}/main/README.md`;
         let repoUrl = `https://github.com/Algorithm-Arena/${name}`;
@@ -129,18 +103,17 @@ const main = () => {
           });
       });
 
-    fetchRepoReadmes(staticRepoList);
+    // fetchRepoReadmes(staticRepoList);
 
-    // dynamic fetch of repos will get rate limited
-    // fetch("https://api.github.com/orgs/Algorithm-Arena/repos")
-    //   .then((res) => res.json())
-    //   .then((data) => {
-    //     fetchRepoReadmes(
-    //       data.filter(({ name }) => {
-    //         return name.includes("weekly-challenge");
-    //       })
-    //     );
-    //   });
+    fetch(repoListGistUrl)
+      .then((res) => res.json())
+      .then((data) => {
+        fetchRepoReadmes(
+          data.filter((name) => {
+            return name.includes("weekly-challenge");
+          })
+        );
+      });
   }, []);
 
   let sorted = isEmptyObject(readmes)
