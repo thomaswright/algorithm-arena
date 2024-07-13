@@ -162,38 +162,36 @@ const main = () => {
       });
   }, []);
 
-  let sorted = isEmptyObject(readmes)
-    ? []
-    : objectValues(readmes).sort(({ num: a }, { num: b }) => b - a);
+  let details = (isEmptyObject(readmes) ? [] : objectValues(readmes)).map(
+    ({ content, url, challengeNumber }) => {
+      let contentParsed = marked.parse(content);
+      var contentDom = new DOMParser().parseFromString(
+        contentParsed,
+        "text/html"
+      );
 
-  let details = sorted.map(({ content, url, challengeNumber }) => {
-    let contentParsed = marked.parse(content);
-    var contentDom = new DOMParser().parseFromString(
-      contentParsed,
-      "text/html"
-    );
+      const title = contentDom.querySelector("h1");
+      const paragraph = contentDom.querySelector("p");
 
-    const title = contentDom.querySelector("h1");
-    const paragraph = contentDom.querySelector("p");
+      const winnerList = substringBetween(content, "### Winner", "### Prizes")
+        .split("*")
+        .map((li) => {
+          return {
+            username: getFirstUsername(li),
+            submissionLink: getSubmissionLinkByLink(li, url),
+          };
+        })
+        .filter(({ username }) => username !== null);
 
-    const winnerList = substringBetween(content, "### Winner", "### Prizes")
-      .split("*")
-      .map((li) => {
-        return {
-          username: getFirstUsername(li),
-          submissionLink: getSubmissionLinkByLink(li, url),
-        };
-      })
-      .filter(({ username }) => username !== null);
-
-    return {
-      challengeNumber,
-      url,
-      title,
-      paragraph,
-      winnerList,
-    };
-  });
+      return {
+        challengeNumber,
+        url,
+        title,
+        paragraph,
+        winnerList,
+      };
+    }
+  );
 
   let submissionsByUser = details.reduce((acc, cur) => {
     return cur.winnerList.reduce((acc2, cur2, i) => {
@@ -227,6 +225,10 @@ const main = () => {
     })
     .sort(({ score: a }, { score: b }) => b - a);
 
+  let sorted = [...details].sort(
+    ({ challengeNumber: a }, { challengeNumber: b }) => b - a
+  );
+
   return (
     <div className="bg-slate-100 text-slate-900 min-h-screen">
       <div className="max-w-xl pt-6">
@@ -244,7 +246,7 @@ const main = () => {
           <Link href={routeBase + "/leaderboard"}>
             <div className={"px-6 pt-1 pb-3"}>{"Go to Leaderboard"}</div>
           </Link>
-          {details.map(({ url, winnerList, title, paragraph }) => {
+          {sorted.map(({ url, winnerList, title, paragraph }) => {
             return (
               <div key={url} className="pb-10 px-6">
                 <div className="pb-2 border-b border-slate-300">
