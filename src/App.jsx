@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { marked } from "marked";
-import { Link, Route } from "wouter";
+import { Link, Route, useLocation } from "wouter";
 
 let routeBase = "/algorithm-arena";
 
@@ -116,6 +116,15 @@ const SubmissionList = ({ submissionLinks, index }) => {
 
 const main = () => {
   let [readmes, setReadmes] = React.useState({});
+  const [location, setLocation] = useLocation();
+
+  useEffect(() => {
+    let path = localStorage.getItem("path");
+    if (path) {
+      localStorage.removeItem("path");
+      setLocation([path]);
+    }
+  }, []);
 
   useEffect(() => {
     let fetchRepoReadmes = (repoList) =>
