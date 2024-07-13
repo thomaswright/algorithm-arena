@@ -266,7 +266,7 @@ const main = () => {
           <div className="pb-10">
             <div className="px-6 pb-2 font-bold text-2xl">Leaderboard</div>
             <div className="px-6 pb-2  text-xs font-medium">
-              {"3 points for 1st, 2 for 2nd, 1 for 1st"}
+              {"3 points for 1st, 2 for 2nd, 1 for 3rd"}
             </div>
 
             <div className="px-6 pt-1">
