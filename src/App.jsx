@@ -96,7 +96,7 @@ const SubmissionList = ({ submissionLinks, index }) => {
   let submissions = submissionLinks[index];
   return (
     <div
-      className="flex flex-row gap-1 px-2 mx-1 rounded items-center flex-wrap min-w-20"
+      className="my-1 mx-1 flex flex-row gap-1 px-2 rounded items-center flex-wrap min-w-20"
       style={index < 3 ? medalStyles[index] : {}}
     >
       {submissions.map(({ challengeNumber, submissionLink }) => {
@@ -280,7 +280,7 @@ const main = () => {
               {"3 points for 1st, 2 for 2nd, 1 for 3rd"}
             </div>
 
-            <div className="px-6 pt-1">
+            <div className="px-6 pt-1 overflow-x-scroll ">
               <table class="">
                 {leaderBoard.map(({ username, submissions, score }, i) => {
                   let submissionLinks = submissions.reduce(
