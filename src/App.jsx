@@ -96,7 +96,7 @@ const SubmissionList = ({ submissionLinks, index }) => {
   let submissions = submissionLinks[index];
   return (
     <div
-      className="flex flex-row gap-1 px-2 rounded items-center flex-wrap "
+      className="flex flex-row gap-1 px-2 mx-1 rounded items-center flex-wrap min-w-20"
       style={index < 3 ? medalStyles[index] : {}}
     >
       {submissions.map(({ challengeNumber, submissionLink }) => {
@@ -263,50 +263,73 @@ const main = () => {
           <Link href={routeBase + "/"}>
             <div className={"px-6 pt-1 pb-3"}>{"Go to Challenges"}</div>
           </Link>
-          <div>
+          <div className="pb-10">
             <div className="px-6 pb-2 font-bold text-2xl">Leaderboard</div>
-            <div class="grid grid-cols-6 gap-2">
-              {leaderBoard.map(({ username, submissions, score }) => {
-                let submissionLinks = submissions.reduce(
-                  (acc, cur) => {
-                    return cur.rank > 2
-                      ? acc
-                      : updateArray(acc, cur.rank, (s) => {
-                          return [
-                            ...s,
-                            {
-                              submissionLink: cur.submissionLink,
-                              challengeNumber: cur.challengeNumber,
-                            },
-                          ];
-                        });
-                  },
-                  [[], [], []]
-                );
-                return score === 0 ? null : (
-                  <>
-                    <a
-                      href={"https://github.com/" + username}
-                      className="text-inherit col-span-2 text-right "
-                    >
-                      {"@" + username}
-                    </a>
-                    <SubmissionList
-                      submissionLinks={submissionLinks}
-                      index={0}
-                    />
-                    <SubmissionList
-                      submissionLinks={submissionLinks}
-                      index={1}
-                    />
-                    <SubmissionList
-                      submissionLinks={submissionLinks}
-                      index={2}
-                    />
-                    <div>{score}</div>
-                  </>
-                );
-              })}
+            <div className="px-6 pb-2  text-xs font-medium">
+              {"3 points for 1st, 2 for 2nd, 1 for 1st"}
+            </div>
+
+            <div className="px-6 pt-1">
+              <table class="">
+                {leaderBoard.map(({ username, submissions, score }, i) => {
+                  let submissionLinks = submissions.reduce(
+                    (acc, cur) => {
+                      return cur.rank > 2
+                        ? acc
+                        : updateArray(acc, cur.rank, (s) => {
+                            return [
+                              ...s,
+                              {
+                                submissionLink: cur.submissionLink,
+                                challengeNumber: cur.challengeNumber,
+                              },
+                            ];
+                          });
+                    },
+                    [[], [], []]
+                  );
+                  return score === 0 ? null : (
+                    <tr className="divide-y ">
+                      <td>
+                        <div className="font-bold text-sm pr-2 text-slate-400">
+                          {i + 1}
+                        </div>
+                      </td>
+                      <td>
+                        <div className="py-1 pr-2 flex ">
+                          <a
+                            href={"https://github.com/" + username}
+                            className="text-inherit col-span-2 text-right "
+                          >
+                            {"@" + username}
+                          </a>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="font-bold text-sm px-2">{score}</div>
+                      </td>
+                      <td>
+                        <SubmissionList
+                          submissionLinks={submissionLinks}
+                          index={0}
+                        />
+                      </td>
+                      <td>
+                        <SubmissionList
+                          submissionLinks={submissionLinks}
+                          index={1}
+                        />
+                      </td>
+                      <td>
+                        <SubmissionList
+                          submissionLinks={submissionLinks}
+                          index={2}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </table>
             </div>
           </div>
         </Route>
