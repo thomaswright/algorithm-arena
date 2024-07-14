@@ -282,64 +282,81 @@ const main = () => {
 
             <div className="px-6 pt-1 overflow-x-scroll ">
               <table class="">
-                {leaderBoard.map(({ username, submissions, score }, i) => {
-                  let submissionLinks = submissions.reduce(
-                    (acc, cur) => {
-                      return cur.rank > 2
-                        ? acc
-                        : updateArray(acc, cur.rank, (s) => {
-                            return [
-                              ...s,
-                              {
-                                submissionLink: cur.submissionLink,
-                                challengeNumber: cur.challengeNumber,
-                              },
-                            ];
-                          });
-                    },
-                    [[], [], []]
-                  );
-                  return score === 0 ? null : (
-                    <tr className="divide-y ">
-                      <td>
-                        <div className="font-bold text-sm pr-2 text-slate-400">
-                          {i + 1}
-                        </div>
-                      </td>
-                      <td>
-                        <div className="py-1 pr-2 flex ">
-                          <a
-                            href={"https://github.com/" + username}
-                            className="text-inherit col-span-2 text-right "
-                          >
-                            {"@" + username}
-                          </a>
-                        </div>
-                      </td>
-                      <td>
-                        <div className="font-bold text-sm px-2">{score}</div>
-                      </td>
-                      <td>
-                        <SubmissionList
-                          submissionLinks={submissionLinks}
-                          index={0}
-                        />
-                      </td>
-                      <td>
-                        <SubmissionList
-                          submissionLinks={submissionLinks}
-                          index={1}
-                        />
-                      </td>
-                      <td>
-                        <SubmissionList
-                          submissionLinks={submissionLinks}
-                          index={2}
-                        />
-                      </td>
-                    </tr>
-                  );
-                })}
+                {leaderBoard.reduce(
+                  (
+                    [acc, lastScore, lastRank],
+                    { username, submissions, score },
+                    i
+                  ) => {
+                    let submissionLinks = submissions.reduce(
+                      (acc, cur) => {
+                        return cur.rank > 2
+                          ? acc
+                          : updateArray(acc, cur.rank, (s) => {
+                              return [
+                                ...s,
+                                {
+                                  submissionLink: cur.submissionLink,
+                                  challengeNumber: cur.challengeNumber,
+                                },
+                              ];
+                            });
+                      },
+                      [[], [], []]
+                    );
+                    let isSameScore = score === lastScore;
+
+                    let result =
+                      score === 0 ? null : (
+                        <tr className="divide-y ">
+                          <td>
+                            <div className="font-bold text-sm pr-2 text-slate-400">
+                              {isSameScore ? "-" : i + 1}
+                            </div>
+                          </td>
+                          <td>
+                            <div className="py-1 pr-2 flex ">
+                              <a
+                                href={"https://github.com/" + username}
+                                className="text-inherit col-span-2 text-right "
+                              >
+                                {"@" + username}
+                              </a>
+                            </div>
+                          </td>
+                          <td>
+                            <div className="font-bold text-sm px-2">
+                              {score}
+                            </div>
+                          </td>
+                          <td>
+                            <SubmissionList
+                              submissionLinks={submissionLinks}
+                              index={0}
+                            />
+                          </td>
+                          <td>
+                            <SubmissionList
+                              submissionLinks={submissionLinks}
+                              index={1}
+                            />
+                          </td>
+                          <td>
+                            <SubmissionList
+                              submissionLinks={submissionLinks}
+                              index={2}
+                            />
+                          </td>
+                        </tr>
+                      );
+                    return [
+                      [...acc, result],
+                      score,
+                      isSameScore ? lastRank : i,
+                    ];
+                  },
+                  [[], null, 0]
+                )}
               </table>
             </div>
           </div>
