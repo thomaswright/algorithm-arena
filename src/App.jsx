@@ -363,7 +363,7 @@ const main = () => {
           {"Website by "}
           <a
             className="text-blue-500 font-medium"
-            href={"https://github.com/thomaswright"}
+            href={"https://github.com/thomaswright/algorithm-arena"}
           >
             {"Thomas Wright"}
           </a>
