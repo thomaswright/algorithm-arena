@@ -81,9 +81,9 @@ const Winner = ({ winnerList, index }) => {
   return winner !== undefined ? (
     <div
       className="border rounded-full w-fit px-3 py-1 font-bold flex flex-row flex-wrap"
-      style={index < 3 ? medalStyles[index] : {}}
+      style={index < 3 ? medalStyles[winner.rank] : {}}
     >
-      <span className="pr-1">{index < 3 ? places[index] : ""}</span>
+      <span className="pr-1">{index < 3 ? places[winner.rank] : ""}</span>
       <a href={winner.submissionLink} className="text-inherit">
         {winner.usernames
           .map((username) => {
@@ -180,13 +180,20 @@ const main = () => {
         .split("*")
         .map((li) => {
           let usernames = getAllUsernames(li);
+          let submissionLink = getSubmissionLinkByLink(li, url);
 
           return {
             usernames: usernames ? usernames : [],
-            submissionLink: getSubmissionLinkByLink(li, url),
+            submissionLink,
           };
         })
-        .filter(({ usernames }) => usernames.length !== 0);
+        .filter(({ usernames }) => usernames.length !== 0)
+        .map((x, i) => {
+          return {
+            ...x,
+            rank: challengeNumber === "2" ? 0 : i,
+          };
+        });
 
       return {
         challengeNumber,
@@ -199,21 +206,50 @@ const main = () => {
   );
 
   let submissionsByUser = details.reduce((acc, cur) => {
-    return cur.winnerList.reduce((acc2, cur2, i) => {
-      return cur2.usernames.reduce((acc3, username) => {
-        return {
-          ...acc3,
-          [username]: [
-            ...(acc3[username] ? acc3[username] : []),
-            {
-              rank: i,
-              submissionLink: cur2.submissionLink,
-              challengeNumber: cur.challengeNumber,
-            },
-          ],
-        };
-      }, acc2);
-    }, acc);
+    // conditional for hard coding challenge 2
+    // which has the only tie
+    if (cur.challengeNumber === "2") {
+      let u0 = cur.winnerList[0];
+      let u0Name = u0.usernames[0];
+      let u1 = cur.winnerList[1];
+      let u1Name = u1.usernames[0];
+
+      return {
+        ...acc,
+        [u0Name]: [
+          ...(acc[u0Name] ? acc[u0Name] : []),
+          {
+            rank: 0,
+            submissionLink: u0.submissionLink,
+            challengeNumber: 2,
+          },
+        ],
+        [u1Name]: [
+          ...(acc[u1Name] ? acc[u1Name] : []),
+          {
+            rank: 0,
+            submissionLink: u1.submissionLink,
+            challengeNumber: 2,
+          },
+        ],
+      };
+    } else {
+      return cur.winnerList.reduce((acc2, cur2, i) => {
+        return cur2.usernames.reduce((acc3, username) => {
+          return {
+            ...acc3,
+            [username]: [
+              ...(acc3[username] ? acc3[username] : []),
+              {
+                rank: i,
+                submissionLink: cur2.submissionLink,
+                challengeNumber: cur.challengeNumber,
+              },
+            ],
+          };
+        }, acc2);
+      }, acc);
+    }
   }, {});
 
   let leaderBoard = Object.keys(submissionsByUser)
