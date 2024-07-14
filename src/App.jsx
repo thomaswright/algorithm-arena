@@ -310,8 +310,8 @@ const main = () => {
                       score === 0 ? null : (
                         <tr className="divide-y ">
                           <td>
-                            <div className="font-bold text-sm pr-2 text-slate-400">
-                              {isSameScore ? "-" : i + 1}
+                            <div className="font-bold text-sm pr-2 text-slate-400 text-center">
+                              {isSameScore ? "·" : i + 1}
                             </div>
                           </td>
                           <td>
