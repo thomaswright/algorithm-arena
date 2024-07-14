@@ -39,11 +39,10 @@ function substringBetween(mainString, substringA, substringB) {
   return mainString.substring(indexA + substringA.length, indexB);
 }
 
-function getFirstUsername(str) {
-  const regex = /@([^\s.,!?;:]+)/;
-  const match = str.match(regex);
-
-  return match ? match[1] : null;
+function getAllUsernames(str) {
+  const regex = /@([^\s.,!?;:]+)/g;
+  const matches = [...str.matchAll(regex)].map((match) => match[1]);
+  return matches;
 }
 
 function escapeRegExp(string) {
@@ -81,12 +80,16 @@ const Winner = ({ winnerList, index }) => {
   let winner = winnerList[index];
   return winner !== undefined ? (
     <div
-      className="border rounded-full w-fit px-3 py-1 font-bold"
+      className="border rounded-full w-fit px-3 py-1 font-bold flex flex-row flex-wrap"
       style={index < 3 ? medalStyles[index] : {}}
     >
       <span className="pr-1">{index < 3 ? places[index] : ""}</span>
       <a href={winner.submissionLink} className="text-inherit">
-        {"@" + winner.username}
+        {winner.usernames
+          .map((username) => {
+            return "@" + username;
+          })
+          .join(" ")}
       </a>
     </div>
   ) : null;
@@ -176,12 +179,14 @@ const main = () => {
       const winnerList = substringBetween(content, "### Winner", "### Prizes")
         .split("*")
         .map((li) => {
+          let usernames = getAllUsernames(li);
+
           return {
-            username: getFirstUsername(li),
+            usernames: usernames ? usernames : [],
             submissionLink: getSubmissionLinkByLink(li, url),
           };
         })
-        .filter(({ username }) => username !== null);
+        .filter(({ usernames }) => usernames.length !== 0);
 
       return {
         challengeNumber,
@@ -195,17 +200,19 @@ const main = () => {
 
   let submissionsByUser = details.reduce((acc, cur) => {
     return cur.winnerList.reduce((acc2, cur2, i) => {
-      return {
-        ...acc2,
-        [cur2.username]: [
-          ...(acc2[cur2.username] ? acc2[cur2.username] : []),
-          {
-            rank: i,
-            submissionLink: cur2.submissionLink,
-            challengeNumber: cur.challengeNumber,
-          },
-        ],
-      };
+      return cur2.usernames.reduce((acc3, username) => {
+        return {
+          ...acc3,
+          [username]: [
+            ...(acc3[username] ? acc3[username] : []),
+            {
+              rank: i,
+              submissionLink: cur2.submissionLink,
+              challengeNumber: cur.challengeNumber,
+            },
+          ],
+        };
+      }, acc2);
     }, acc);
   }, {});
 
