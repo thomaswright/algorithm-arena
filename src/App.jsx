@@ -40,7 +40,7 @@ function substringBetween(mainString, substringA, substringB) {
 }
 
 function getAllUsernames(str) {
-  const regex = /@([^\s.,!?;:]+)/g;
+  const regex = /@([^\s.,!?;:/)]+)/g;
   const matches = [...str.matchAll(regex)].map((match) => match[1]);
   return matches;
 }
@@ -72,6 +72,11 @@ let medalStyles = [
     color: `oklch(0.5 0.1 75)`,
     borderColor: `oklch(0.6 0.1 75)`,
   },
+  {
+    backgroundColor: `oklch(0.95 0 75)`,
+    color: `oklch(0.5 0 75)`,
+    borderColor: `oklch(0.6 0 75)`,
+  },
 ];
 
 let places = ["1st", "2nd", "3rd"];
@@ -99,8 +104,8 @@ const SubmissionList = ({ submissionLinks, index }) => {
   let submissions = submissionLinks[index];
   return (
     <div
-      className="my-1 mx-1 flex flex-row gap-1 px-2 rounded items-center flex-wrap min-w-20"
-      style={index < 3 ? medalStyles[index] : {}}
+      className="my-1 mx-1 flex flex-row gap-1 px-2 rounded items-center flex-wrap min-w-20 max-w-32"
+      style={index < 4 ? medalStyles[index] : {}}
     >
       {submissions.map(({ challengeNumber, submissionLink }) => {
         {
@@ -241,7 +246,7 @@ const main = () => {
             [username]: [
               ...(acc3[username] ? acc3[username] : []),
               {
-                rank: i,
+                rank: i > 2 ? "HM" : i,
                 submissionLink: cur2.submissionLink,
                 challengeNumber: cur.challengeNumber,
               },
@@ -256,7 +261,7 @@ const main = () => {
     .map((username) => {
       let submissions = submissionsByUser[username];
       let score = submissions.reduce((totalScore, { rank }) => {
-        let scoreInc = rank === 0 ? 3 : rank === 1 ? 2 : rank === 2 ? 1 : 0;
+        let scoreInc = rank === 0 ? 5 : rank === 1 ? 4 : rank === 2 ? 3 : 1;
         return totalScore + scoreInc;
       }, 0);
 
@@ -266,7 +271,16 @@ const main = () => {
         score,
       };
     })
-    .sort(({ score: a }, { score: b }) => b - a);
+    .sort(
+      (
+        { score: aScore, username: aUsername },
+        { score: bScore, username: bUsername }
+      ) => {
+        return bScore === aScore
+          ? aUsername.localeCompare(bUsername)
+          : bScore - aScore;
+      }
+    );
 
   let sorted = [...details].sort(
     ({ challengeNumber: a }, { challengeNumber: b }) => b - a
@@ -274,7 +288,7 @@ const main = () => {
 
   return (
     <div className="bg-slate-100 text-slate-900 min-h-screen">
-      <div className="max-w-xl pt-6">
+      <div className=" pt-6">
         <a
           href="https://github.com/Algorithm-Arena"
           className="text-3xl px-6 pt-6 pb-3 font-black text-inherit"
@@ -289,29 +303,31 @@ const main = () => {
           <Link href={routeBase + "/leaderboard"}>
             <div className={"px-6 pt-1 pb-3"}>{"Go to Leaderboard"}</div>
           </Link>
-          {sorted.map(({ url, winnerList, title, paragraph }) => {
-            return (
-              <div key={url} className="pb-10 px-6">
-                <div className="pb-2 border-b border-slate-300">
-                  <a
-                    href={url}
-                    className="text-slate-800 text-2xl font-bold "
-                    dangerouslySetInnerHTML={{ __html: title.outerHTML }}
-                  />
-                </div>
+          <div className="max-w-xl">
+            {sorted.map(({ url, winnerList, title, paragraph }) => {
+              return (
+                <div key={url} className="pb-10 px-6">
+                  <div className="pb-2 border-b border-slate-300">
+                    <a
+                      href={url}
+                      className="text-slate-800 text-2xl font-bold "
+                      dangerouslySetInnerHTML={{ __html: title.outerHTML }}
+                    />
+                  </div>
 
-                <div
-                  className=" pt-3"
-                  dangerouslySetInnerHTML={{ __html: paragraph.outerHTML }}
-                />
-                <div className="flex flex-col sm:flex-row gap-3 py-2 flex-wrap">
-                  <Winner winnerList={winnerList} index={0} />
-                  <Winner winnerList={winnerList} index={1} />
-                  <Winner winnerList={winnerList} index={2} />
+                  <div
+                    className=" pt-3"
+                    dangerouslySetInnerHTML={{ __html: paragraph.outerHTML }}
+                  />
+                  <div className="flex flex-col sm:flex-row gap-3 py-2 flex-wrap">
+                    <Winner winnerList={winnerList} index={0} />
+                    <Winner winnerList={winnerList} index={1} />
+                    <Winner winnerList={winnerList} index={2} />
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </Route>
         <Route path={"/algorithm-arena" + "/leaderboard"}>
           <Link href={routeBase + "/"}>
@@ -320,11 +336,22 @@ const main = () => {
           <div className="pb-10">
             <div className="px-6 pb-2 font-bold text-2xl">Leaderboard</div>
             <div className="px-6 pb-2  text-xs font-medium">
-              {"3 points for 1st, 2 for 2nd, 1 for 3rd"}
+              {
+                "5 points for 1st, 4 for 2nd, 3 for 3rd, and 1 for any other submission"
+              }
             </div>
 
             <div className="px-6 pt-1 overflow-x-scroll ">
               <table class="">
+                <tr className="text-sm ">
+                  <th className=" text-left px-2 "></th>
+                  <th className=" text-left  border-r">User</th>{" "}
+                  <th className=" text-left px-2 border-r">Score</th>
+                  <th className=" text-left px-2 border-r">1st Place</th>
+                  <th className=" text-left px-2 border-r">2nd Place</th>
+                  <th className=" text-left px-2 border-r">3rd Place</th>
+                  <th className=" text-left px-2">Other</th>
+                </tr>
                 {leaderBoard.reduce(
                   (
                     [acc, lastScore, lastRank],
@@ -333,8 +360,16 @@ const main = () => {
                   ) => {
                     let submissionLinks = submissions.reduce(
                       (acc, cur) => {
-                        return cur.rank > 2
-                          ? acc
+                        return cur.rank === "HM"
+                          ? updateArray(acc, 3, (s) => {
+                              return [
+                                ...s,
+                                {
+                                  submissionLink: cur.submissionLink,
+                                  challengeNumber: cur.challengeNumber,
+                                },
+                              ];
+                            })
                           : updateArray(acc, cur.rank, (s) => {
                               return [
                                 ...s,
@@ -345,10 +380,9 @@ const main = () => {
                               ];
                             });
                       },
-                      [[], [], []]
+                      [[], [], [], []]
                     );
                     let isSameScore = score === lastScore;
-
                     let result =
                       score === 0 ? null : (
                         <tr key={username} className="divide-y ">
@@ -388,6 +422,12 @@ const main = () => {
                             <SubmissionList
                               submissionLinks={submissionLinks}
                               index={2}
+                            />
+                          </td>
+                          <td>
+                            <SubmissionList
+                              submissionLinks={submissionLinks}
+                              index={3}
                             />
                           </td>
                         </tr>
