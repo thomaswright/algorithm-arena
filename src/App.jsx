@@ -349,11 +349,9 @@ const main = () => {
                           </td>
                         </tr>
                       );
-                    return [
-                      [...acc, result],
-                      score,
-                      isSameScore ? lastRank : i,
-                    ];
+                    return i >= leaderBoard.length - 1
+                      ? [...acc, result]
+                      : [[...acc, result], score, isSameScore ? lastRank : i];
                   },
                   [[], null, 0]
                 )}
