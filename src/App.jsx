@@ -261,7 +261,7 @@ const main = () => {
                   className=" pt-3"
                   dangerouslySetInnerHTML={{ __html: paragraph.outerHTML }}
                 />
-                <div className="flex flex-col sm:flex-row gap-3 py-2 ">
+                <div className="flex flex-col sm:flex-row gap-3 py-2 flex-wrap">
                   <Winner winnerList={winnerList} index={0} />
                   <Winner winnerList={winnerList} index={1} />
                   <Winner winnerList={winnerList} index={2} />
@@ -359,6 +359,15 @@ const main = () => {
             </div>
           </div>
         </Route>
+        <div className="text-slate-500 px-6 py-4 text-xs">
+          {"Website by "}
+          <a
+            className="text-blue-500 font-medium"
+            href={"https://github.com/thomaswright"}
+          >
+            {"Thomas Wright"}
+          </a>
+        </div>
       </div>
     </div>
   );
