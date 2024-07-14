@@ -105,7 +105,7 @@ const SubmissionList = ({ submissionLinks, index }) => {
       {submissions.map(({ challengeNumber, submissionLink }) => {
         {
           return (
-            <div className=" w-fit text-sm font-bold">
+            <div key={submissionLink} className=" w-fit text-sm font-bold">
               <a href={submissionLink} className="text-inherit">
                 {"#" + challengeNumber}
               </a>
@@ -351,7 +351,7 @@ const main = () => {
 
                     let result =
                       score === 0 ? null : (
-                        <tr className="divide-y ">
+                        <tr key={username} className="divide-y ">
                           <td>
                             <div className="font-bold text-sm pr-2 text-slate-400 text-center">
                               {isSameScore ? "·" : i + 1}
