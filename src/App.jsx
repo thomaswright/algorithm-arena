@@ -56,16 +56,29 @@ function getSubmissionLinkByLink(str, link) {
   return match ? match[0] : null;
 }
 
-function getAllGHLinks(str) {
+function getGHLinks(str) {
   const escaped = escapeRegExp("https://github.com");
-  const regex = new RegExp(`${escaped}[^\\s]*`, "g");
+  const regex = new RegExp(`${escaped}[^\\s\\)]*`, "g");
   const matches = str.match(regex);
   return matches;
 }
 
-function removeAllGHLinks(str) {
+function removeGHLinks(str) {
   const escaped = escapeRegExp("https://github.com");
-  const regex = new RegExp(`${escaped}[^\\s]*`, "g");
+  const regex = new RegExp(`${escaped}[^\\s\\)]*`, "g");
+  return str.replace(regex, "");
+}
+
+function getGHImageTags(str) {
+  const escaped = escapeRegExp("https://github.com");
+  const regex = new RegExp(`!\\[([^\\]]+)\\]\\(${escaped}([^\\)]+)\\)`, "g");
+  const matches = str.match(regex);
+  return matches;
+}
+
+function removeGHImageTags(str) {
+  const escaped = escapeRegExp("https://github.com");
+  const regex = new RegExp(`!\\[([^\\]]+)\\]\\(${escaped}([^\\)]+)\\)`, "g");
   return str.replace(regex, "");
 }
 
@@ -167,6 +180,9 @@ const SubmissionList = ({
 };
 
 const CommentDetails = ({ comments, close }) => {
+  if (comments && comments.challengeNumber === "3") {
+    console.log(comments);
+  }
   return comments ? (
     <div className="p-4 pt-2 border border-slate-300 rounded-xl mt-1 max-w-xl relative">
       <div
@@ -180,7 +196,7 @@ const CommentDetails = ({ comments, close }) => {
       <div
         className="pb-2"
         dangerouslySetInnerHTML={{
-          __html: comments.commentText,
+          __html: marked(comments.commentText),
         }}
       />
       <div className="flex flex-row justify-between">
@@ -190,6 +206,11 @@ const CommentDetails = ({ comments, close }) => {
       {comments.videoLink && (
         <div className="max-w-xl">
           <video className="pt-2" autoPlay={true} src={comments.videoLink} />
+        </div>
+      )}
+      {comments.imgLink && (
+        <div className="max-w-xl">
+          <img className="pt-2" src={comments.imgLink} />
         </div>
       )}
     </div>
@@ -263,8 +284,12 @@ const main = () => {
         .map((li) => {
           let usernames = getAllUsernames(li);
           let submissionLink = getSubmissionLinkByLink(li, url);
-          let ghLinks = getAllGHLinks(li);
-          let commentText = removeAllGHLinks(li);
+
+          let imageLinks = getGHImageTags(li);
+          let imagesRemoved = removeGHImageTags(li);
+
+          let ghLinks = getGHLinks(imagesRemoved);
+          let commentText = removeGHLinks(imagesRemoved);
 
           return {
             url,
@@ -273,6 +298,7 @@ const main = () => {
             submissionLink,
             commentText,
             videoLink: ghLinks && (ghLinks[1] || null),
+            imgLink: imageLinks ? getGHLinks(imageLinks[0]) : null,
           };
         })
         .filter(({ usernames }) => usernames.length !== 0)
