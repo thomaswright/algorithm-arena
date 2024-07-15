@@ -143,7 +143,6 @@ const SubmissionList = ({
               key={submission.submissionLink}
               className=" w-fit text-sm font-bold cursor-pointer"
               onClick={() => {
-                console.log("click");
                 setCommentsPerUser((v) => {
                   return {
                     ...v,
