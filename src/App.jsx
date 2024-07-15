@@ -56,6 +56,19 @@ function getSubmissionLinkByLink(str, link) {
   return match ? match[0] : null;
 }
 
+function getAllGHLinks(str) {
+  const escaped = escapeRegExp("https://github.com");
+  const regex = new RegExp(`${escaped}[^\\s]*`, "g");
+  const matches = str.match(regex);
+  return matches;
+}
+
+function removeAllGHLinks(str) {
+  const escaped = escapeRegExp("https://github.com");
+  const regex = new RegExp(`${escaped}[^\\s]*`, "g");
+  return str.replace(regex, "");
+}
+
 let medalStyles = [
   {
     backgroundColor: `oklch(0.95 0.1 95)`,
@@ -81,39 +94,71 @@ let medalStyles = [
 
 let places = ["1st", "2nd", "3rd"];
 
-const Winner = ({ winnerList, index }) => {
+const Winner = ({ url, winnerList, index, setCommentsPerChallenge }) => {
   let winner = winnerList[index];
   return winner !== undefined ? (
     <div
-      className="border rounded-full w-fit px-3 py-1 font-bold flex flex-row flex-wrap"
+      className="border rounded-full w-fit px-3 py-1 font-bold flex flex-row flex-wrap cursor-pointer"
       style={index < 3 ? medalStyles[winner.rank] : {}}
+      onClick={() => {
+        setCommentsPerChallenge((v) => {
+          return {
+            ...v,
+            [url]:
+              v[url] && v[url].submissionLink === winner.submissionLink
+                ? null
+                : winner,
+          };
+        });
+      }}
     >
       <span className="pr-1">{index < 3 ? places[winner.rank] : ""}</span>
-      <a href={winner.submissionLink} className="text-inherit">
+      <span className="text-inherit">
         {winner.usernames
           .map((username) => {
             return "@" + username;
           })
           .join(" ")}
-      </a>
+      </span>
     </div>
   ) : null;
 };
 
-const SubmissionList = ({ submissionLinks, index }) => {
+const SubmissionList = ({
+  submissionLinks,
+  index,
+  username,
+  setCommentsPerUser,
+}) => {
   let submissions = submissionLinks[index];
   return (
     <div
       className="my-1 mx-1 flex flex-row gap-1 px-2 rounded items-center flex-wrap min-w-20 max-w-32"
       style={index < 4 ? medalStyles[index] : {}}
     >
-      {submissions.map(({ challengeNumber, submissionLink }) => {
+      {submissions.map((submission) => {
         {
           return (
-            <div key={submissionLink} className=" w-fit text-sm font-bold ">
-              <a href={submissionLink} className="text-inherit">
-                {"#" + challengeNumber}
-              </a>
+            <div
+              key={submission.submissionLink}
+              className=" w-fit text-sm font-bold cursor-pointer"
+              onClick={() => {
+                console.log("click");
+                setCommentsPerUser((v) => {
+                  return {
+                    ...v,
+                    [username]:
+                      v[username] &&
+                      v[username].submissionLink === submission.submissionLink
+                        ? null
+                        : submission,
+                  };
+                });
+              }}
+            >
+              <span className="text-inherit">
+                {"#" + submission.challengeNumber}
+              </span>
             </div>
           );
         }
@@ -122,8 +167,38 @@ const SubmissionList = ({ submissionLinks, index }) => {
   );
 };
 
+const CommentDetails = ({ comments, close }) => {
+  return comments ? (
+    <div className="p-4 pt-2 border border-slate-300 rounded-xl mt-1 max-w-2xl relative">
+      <div
+        className=" absolute right-2 top-0 cursor-pointer"
+        onClick={() => {
+          close();
+        }}
+      >
+        {"×"}
+      </div>
+      <div
+        className="pb-2"
+        dangerouslySetInnerHTML={{
+          __html: comments.commentText,
+        }}
+      />
+      <a href={comments.submissionLink}>{"Submission"}</a>
+      {comments.videoLink && (
+        <div className="max-w-xl">
+          <video className="pt-2" autoPlay={true} src={comments.videoLink} />
+        </div>
+      )}
+    </div>
+  ) : null;
+};
+
 const main = () => {
   let [readmes, setReadmes] = React.useState({});
+  let [commentsPerChallenge, setCommentsPerChallenge] = React.useState({});
+  let [commentsPerUser, setCommentsPerUser] = React.useState({});
+
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
@@ -186,10 +261,14 @@ const main = () => {
         .map((li) => {
           let usernames = getAllUsernames(li);
           let submissionLink = getSubmissionLinkByLink(li, url);
+          let ghLinks = getAllGHLinks(li);
+          let commentText = removeAllGHLinks(li);
 
           return {
             usernames: usernames ? usernames : [],
             submissionLink,
+            commentText,
+            videoLink: ghLinks && (ghLinks[1] || null),
           };
         })
         .filter(({ usernames }) => usernames.length !== 0)
@@ -224,16 +303,16 @@ const main = () => {
         [u0Name]: [
           ...(acc[u0Name] ? acc[u0Name] : []),
           {
+            ...u0,
             rank: 0,
-            submissionLink: u0.submissionLink,
             challengeNumber: 2,
           },
         ],
         [u1Name]: [
           ...(acc[u1Name] ? acc[u1Name] : []),
           {
+            ...u1,
             rank: 0,
-            submissionLink: u1.submissionLink,
             challengeNumber: 2,
           },
         ],
@@ -246,8 +325,8 @@ const main = () => {
             [username]: [
               ...(acc3[username] ? acc3[username] : []),
               {
+                ...cur2,
                 rank: i > 2 ? "HM" : i,
-                submissionLink: cur2.submissionLink,
                 challengeNumber: cur.challengeNumber,
               },
             ],
@@ -285,7 +364,6 @@ const main = () => {
   let sorted = [...details].sort(
     ({ challengeNumber: a }, { challengeNumber: b }) => b - a
   );
-
   return (
     <div className="bg-slate-100 text-slate-900 min-h-screen">
       <div className=" pt-6">
@@ -316,15 +394,42 @@ const main = () => {
                       dangerouslySetInnerHTML={{ __html: title.outerHTML }}
                     />
                   </div>
-
                   <div
                     className=" pt-3"
                     dangerouslySetInnerHTML={{ __html: paragraph.outerHTML }}
                   />
                   <div className="flex flex-col sm:flex-row gap-3 py-2 flex-wrap">
-                    <Winner winnerList={winnerList} index={0} />
-                    <Winner winnerList={winnerList} index={1} />
-                    <Winner winnerList={winnerList} index={2} />
+                    <Winner
+                      url={url}
+                      winnerList={winnerList}
+                      index={0}
+                      setCommentsPerChallenge={setCommentsPerChallenge}
+                    />
+                    <Winner
+                      url={url}
+                      winnerList={winnerList}
+                      index={1}
+                      setCommentsPerChallenge={setCommentsPerChallenge}
+                    />
+                    <Winner
+                      url={url}
+                      winnerList={winnerList}
+                      index={2}
+                      setCommentsPerChallenge={setCommentsPerChallenge}
+                    />
+                  </div>
+                  <div>
+                    <CommentDetails
+                      comments={commentsPerChallenge[url]}
+                      close={() => {
+                        setCommentsPerChallenge((v) => {
+                          return {
+                            ...v,
+                            [url]: null,
+                          };
+                        });
+                      }}
+                    />
                   </div>
                 </div>
               );
@@ -365,22 +470,10 @@ const main = () => {
                       (acc, cur) => {
                         return cur.rank === "HM"
                           ? updateArray(acc, 3, (s) => {
-                              return [
-                                ...s,
-                                {
-                                  submissionLink: cur.submissionLink,
-                                  challengeNumber: cur.challengeNumber,
-                                },
-                              ];
+                              return [...s, cur];
                             })
                           : updateArray(acc, cur.rank, (s) => {
-                              return [
-                                ...s,
-                                {
-                                  submissionLink: cur.submissionLink,
-                                  challengeNumber: cur.challengeNumber,
-                                },
-                              ];
+                              return [...s, cur];
                             });
                       },
                       [[], [], [], []]
@@ -388,52 +481,80 @@ const main = () => {
                     let isSameScore = score === lastScore;
                     let result =
                       score === 0 ? null : (
-                        <tr key={username} className="divide-y ">
-                          <td>
-                            <div className="font-bold text-sm pr-2 text-slate-400 text-center">
-                              {isSameScore ? "·" : i + 1}
-                            </div>
-                          </td>
-                          <td>
-                            <div className="py-1 pr-2 flex ">
-                              <a
-                                href={"https://github.com/" + username}
-                                className="text-inherit col-span-2 text-right "
-                              >
-                                {"@" + username}
-                              </a>
-                            </div>
-                          </td>
-                          <td>
-                            <div className="font-bold text-sm px-2">
-                              {score}
-                            </div>
-                          </td>
-                          <td>
-                            <SubmissionList
-                              submissionLinks={submissionLinks}
-                              index={0}
-                            />
-                          </td>
-                          <td>
-                            <SubmissionList
-                              submissionLinks={submissionLinks}
-                              index={1}
-                            />
-                          </td>
-                          <td>
-                            <SubmissionList
-                              submissionLinks={submissionLinks}
-                              index={2}
-                            />
-                          </td>
-                          <td>
-                            <SubmissionList
-                              submissionLinks={submissionLinks}
-                              index={3}
-                            />
-                          </td>
-                        </tr>
+                        <>
+                          <tr key={username} className="divide-y ">
+                            <td>
+                              <div className="font-bold text-sm pr-2 text-slate-400 text-center">
+                                {isSameScore ? "·" : i + 1}
+                              </div>
+                            </td>
+                            <td>
+                              <div className="py-1 pr-2 flex ">
+                                <a
+                                  href={"https://github.com/" + username}
+                                  className="text-inherit col-span-2 text-right "
+                                >
+                                  {"@" + username}
+                                </a>
+                              </div>
+                            </td>
+                            <td>
+                              <div className="font-bold text-sm px-2">
+                                {score}
+                              </div>
+                            </td>
+                            <td>
+                              <SubmissionList
+                                username={username}
+                                setCommentsPerUser={setCommentsPerUser}
+                                submissionLinks={submissionLinks}
+                                index={0}
+                              />
+                            </td>
+                            <td>
+                              <SubmissionList
+                                username={username}
+                                setCommentsPerUser={setCommentsPerUser}
+                                submissionLinks={submissionLinks}
+                                index={1}
+                              />
+                            </td>
+                            <td>
+                              <SubmissionList
+                                username={username}
+                                setCommentsPerUser={setCommentsPerUser}
+                                submissionLinks={submissionLinks}
+                                index={2}
+                              />
+                            </td>
+                            <td>
+                              <SubmissionList
+                                username={username}
+                                setCommentsPerUser={setCommentsPerUser}
+                                submissionLinks={submissionLinks}
+                                index={3}
+                              />
+                            </td>
+                          </tr>
+                          {commentsPerUser[username] ? (
+                            <tr>
+                              <td></td>
+                              <td colSpan={"6"}>
+                                <CommentDetails
+                                  comments={commentsPerUser[username]}
+                                  close={() => {
+                                    setCommentsPerUser((v) => {
+                                      return {
+                                        ...v,
+                                        [username]: null,
+                                      };
+                                    });
+                                  }}
+                                />
+                              </td>
+                            </tr>
+                          ) : null}
+                        </>
                       );
                     return i >= leaderBoard.length - 1
                       ? [...acc, result]
