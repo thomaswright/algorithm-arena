@@ -40,7 +40,7 @@ function substringBetween(mainString, substringA, substringB) {
 }
 
 function getAllUsernames(str) {
-  const regex = /@([^\s.,!?;:/)]+)/g;
+  const regex = /(?<!\/)@([^\s.,!?;:/)]+)/g;
   const matches = [...str.matchAll(regex)].map((match) => match[1]);
   return matches;
 }
@@ -168,7 +168,7 @@ const SubmissionList = ({
 
 const CommentDetails = ({ comments, close }) => {
   return comments ? (
-    <div className="p-4 pt-2 border border-slate-300 rounded-xl mt-1 max-w-2xl relative">
+    <div className="p-4 pt-2 border border-slate-300 rounded-xl mt-1 max-w-xl relative">
       <div
         className=" absolute right-2 top-0 cursor-pointer"
         onClick={() => {
@@ -183,7 +183,10 @@ const CommentDetails = ({ comments, close }) => {
           __html: comments.commentText,
         }}
       />
-      <a href={comments.submissionLink}>{"Submission"}</a>
+      <div className="flex flex-row justify-between">
+        <a href={comments.submissionLink}>{"Submission"}</a>
+        <a href={comments.url}>{"Challenge #" + comments.challengeNumber}</a>
+      </div>
       {comments.videoLink && (
         <div className="max-w-xl">
           <video className="pt-2" autoPlay={true} src={comments.videoLink} />
@@ -264,6 +267,8 @@ const main = () => {
           let commentText = removeAllGHLinks(li);
 
           return {
+            url,
+            challengeNumber,
             usernames: usernames ? usernames : [],
             submissionLink,
             commentText,
