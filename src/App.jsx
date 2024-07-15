@@ -110,7 +110,7 @@ const SubmissionList = ({ submissionLinks, index }) => {
       {submissions.map(({ challengeNumber, submissionLink }) => {
         {
           return (
-            <div key={submissionLink} className=" w-fit text-sm font-bold">
+            <div key={submissionLink} className=" w-fit text-sm font-bold ">
               <a href={submissionLink} className="text-inherit">
                 {"#" + challengeNumber}
               </a>
@@ -300,9 +300,11 @@ const main = () => {
           <a href="https://github.com/vjeux">{"@vjeux"}</a>
         </div>
         <Route path={"/algorithm-arena" + "/"}>
-          <Link href={routeBase + "/leaderboard"}>
-            <div className={"px-6 pt-1 pb-3"}>{"Go to Leaderboard"}</div>
-          </Link>
+          <div className="px-6 pt-1 pb-3">
+            <Link className={""} href={routeBase + "/leaderboard"}>
+              {"Go to Leaderboard"}
+            </Link>
+          </div>
           <div className="max-w-xl">
             {sorted.map(({ url, winnerList, title, paragraph }) => {
               return (
@@ -330,9 +332,10 @@ const main = () => {
           </div>
         </Route>
         <Route path={"/algorithm-arena" + "/leaderboard"}>
-          <Link href={routeBase + "/"}>
-            <div className={"px-6 pt-1 pb-3"}>{"Go to Challenges"}</div>
-          </Link>
+          <div className={"px-6 pt-1 pb-3"}>
+            <Link href={routeBase + "/"}>{"Go to Challenges"}</Link>
+          </div>
+
           <div className="pb-10">
             <div className="px-6 pb-2 font-bold text-2xl">Leaderboard</div>
             <div className="px-6 pb-2  text-xs font-medium">
