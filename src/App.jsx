@@ -5,7 +5,7 @@ import { Link, Route, useLocation } from "wouter";
 let routeBase = "/algorithm-arena";
 
 let repoListGistUrl =
-  "https://gist.githubusercontent.com/thomaswright/06e827401a84cd949997b56de8a0e345/raw/6c91045fc9acb0f25f04a75d9062f8947d7cddfd/algorithm-arena-repos.json";
+  "https://gist.githubusercontent.com/thomaswright/06e827401a84cd949997b56de8a0e345/raw/algorithm-arena-repos.json";
 
 function isEmptyObject(obj) {
   return Object.keys(obj).length === 0;
@@ -180,9 +180,6 @@ const SubmissionList = ({
 };
 
 const CommentDetails = ({ comments, close }) => {
-  if (comments && comments.challengeNumber === "3") {
-    console.log(comments);
-  }
   return comments ? (
     <div className="p-4 pt-2 border border-slate-300 rounded-xl mt-1 max-w-xl relative">
       <div
@@ -512,7 +509,10 @@ const main = () => {
                     let result =
                       score === 0 ? null : (
                         <>
-                          <tr key={username} className="divide-y ">
+                          <tr
+                            key={username + "_submissions"}
+                            className="divide-y "
+                          >
                             <td>
                               <div className="font-bold text-sm pr-2 text-slate-400 text-center">
                                 {isSameScore ? "·" : i + 1}
@@ -567,7 +567,7 @@ const main = () => {
                             </td>
                           </tr>
                           {commentsPerUser[username] ? (
-                            <tr>
+                            <tr key={username + "_comments"}>
                               <td></td>
                               <td colSpan={"6"}>
                                 <CommentDetails
