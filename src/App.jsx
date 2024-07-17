@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { marked } from "marked";
+import React, { Fragment, useEffect } from "react";
+import { marked, use } from "marked";
 import { Link, Route, useLocation } from "wouter";
 
 let routeBase = "/algorithm-arena";
@@ -363,34 +363,56 @@ const main = () => {
     }
   }, {});
 
-  let leaderBoard = Object.keys(submissionsByUser)
-    .map((username) => {
-      let submissions = submissionsByUser[username];
-      let score = submissions.reduce((totalScore, { rank }) => {
-        let scoreInc = rank === 0 ? 5 : rank === 1 ? 4 : rank === 2 ? 3 : 1;
-        return totalScore + scoreInc;
-      }, 0);
+  let assignRankListing = (arr) => {
+    return arr.length === 0
+      ? []
+      : arr.reduce(
+          ([acc, lastScore, lastRank], props, i, arr) => {
+            let isSameScore = props.score === lastScore;
+            let result = {
+              ...props,
+              rankListing: isSameScore ? "·" : i + 1,
+            };
 
-      return {
-        username,
-        submissions,
-        score,
-      };
-    })
-    .sort(
-      (
-        { score: aScore, username: aUsername },
-        { score: bScore, username: bUsername }
-      ) => {
-        return bScore === aScore
-          ? aUsername.localeCompare(bUsername)
-          : bScore - aScore;
-      }
-    );
+            return i >= arr.length - 1
+              ? [...acc, result]
+              : [[...acc, result], props.score, isSameScore ? lastRank : i];
+          },
+          [[], null, 0]
+        );
+  };
+
+  let leaderBoard = assignRankListing(
+    Object.keys(submissionsByUser)
+      .map((username) => {
+        let submissions = submissionsByUser[username];
+        let score = submissions.reduce((totalScore, { rank }) => {
+          let scoreInc = rank === 0 ? 5 : rank === 1 ? 4 : rank === 2 ? 3 : 1;
+          return totalScore + scoreInc;
+        }, 0);
+
+        return {
+          username,
+          submissions,
+          score,
+        };
+      })
+      .sort(
+        (
+          { score: aScore, username: aUsername },
+          { score: bScore, username: bUsername }
+        ) => {
+          return bScore === aScore
+            ? aUsername.localeCompare(bUsername)
+            : bScore - aScore;
+        }
+      )
+  );
 
   let sorted = [...details].sort(
     ({ challengeNumber: a }, { challengeNumber: b }) => b - a
   );
+
   return (
     <div className="bg-slate-100 text-slate-900 min-h-screen">
       <div className=" pt-6">
@@ -477,45 +499,43 @@ const main = () => {
             </div>
 
             <div className="px-6 pt-1 overflow-x-scroll ">
-              <table class="">
-                <tr className="text-sm ">
-                  <th className=" text-left px-2 "></th>
-                  <th className=" text-left  border-r">User</th>{" "}
-                  <th className=" text-left px-2 border-r">Score</th>
-                  <th className=" text-left px-2 border-r">1st Place</th>
-                  <th className=" text-left px-2 border-r">2nd Place</th>
-                  <th className=" text-left px-2 border-r">3rd Place</th>
-                  <th className=" text-left px-2">Other</th>
-                </tr>
-                {leaderBoard.reduce(
-                  (
-                    [acc, lastScore, lastRank],
-                    { username, submissions, score },
-                    i
-                  ) => {
-                    let submissionLinks = submissions.reduce(
-                      (acc, cur) => {
-                        return cur.rank === "HM"
-                          ? updateArray(acc, 3, (s) => {
-                              return [...s, cur];
-                            })
-                          : updateArray(acc, cur.rank, (s) => {
-                              return [...s, cur];
-                            });
-                      },
-                      [[], [], [], []]
-                    );
-                    let isSameScore = score === lastScore;
-                    let result =
-                      score === 0 ? null : (
-                        <>
+              <table key={"leaderboard-table"}>
+                <thead>
+                  <tr className="text-sm ">
+                    <th className=" text-left px-2 ">{null}</th>
+                    <th className=" text-left  border-r">User</th>
+                    <th className=" text-left px-2 border-r">Score</th>
+                    <th className=" text-left px-2 border-r">1st Place</th>
+                    <th className=" text-left px-2 border-r">2nd Place</th>
+                    <th className=" text-left px-2 border-r">3rd Place</th>
+                    <th className=" text-left px-2">Other</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {leaderBoard.map(
+                    ({ username, submissions, score, rankListing }) => {
+                      let submissionLinks = submissions.reduce(
+                        (acc, cur) => {
+                          return cur.rank === "HM"
+                            ? updateArray(acc, 3, (s) => {
+                                return [...s, cur];
+                              })
+                            : updateArray(acc, cur.rank, (s) => {
+                                return [...s, cur];
+                              });
+                        },
+                        [[], [], [], []]
+                      );
+
+                      return score === 0 ? null : (
+                        <Fragment key={username}>
                           <tr
                             key={username + "_submissions"}
                             className="divide-y "
                           >
                             <td>
                               <div className="font-bold text-sm pr-2 text-slate-400 text-center">
-                                {isSameScore ? "·" : i + 1}
+                                {rankListing}
                               </div>
                             </td>
                             <td>
@@ -584,14 +604,11 @@ const main = () => {
                               </td>
                             </tr>
                           ) : null}
-                        </>
+                        </Fragment>
                       );
-                    return i >= leaderBoard.length - 1
-                      ? [...acc, result]
-                      : [[...acc, result], score, isSameScore ? lastRank : i];
-                  },
-                  [[], null, 0]
-                )}
+                    }
+                  )}
+                </tbody>
               </table>
             </div>
           </div>
