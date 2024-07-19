@@ -97,23 +97,33 @@ function App(props) {
   var match = React.useState(function () {
         return [];
       });
-  return match[0].map(function (readme) {
-              var domParser = new DomParser();
-              domParser.parseFromString(Marked.parse(readme.content), "text/html");
-              Core__Option.getOr(substringBetween(readme.content, "### Winner", "### Prizes"), "").split("*").map(function (s) {
-                    return {
-                            url: readme.url,
-                            challengeNumber: readme.challengeNumber,
-                            usernames: getUsernames(s),
-                            submissionLink: getSubmissionLink(s, readme.url),
-                            commentText: s.replace(ghImageTagsRE, "").replace(ghLinkRE, ""),
-                            videoLink: getGHLinks(s.replace(ghImageTagsRE, "")),
-                            imgLink: Core__Option.flatMap(getGHImageTags(s), (function (a) {
-                                    return getGHLinks(a);
-                                  }))
-                          };
-                  });
+  match[0].map(function (readme) {
+        var domParser = new DomParser();
+        var contentDom = domParser.parseFromString(Marked.parse(readme.content), "text/html");
+        var title = contentDom.querySelector("h1");
+        var challengeDescription = contentDom.querySelector("p");
+        var submissionComments = Core__Option.getOr(substringBetween(readme.content, "### Winner", "### Prizes"), "").split("*").map(function (s, i) {
+              return {
+                      url: readme.url,
+                      challengeNumber: readme.challengeNumber,
+                      usernames: getUsernames(s),
+                      submissionLink: getSubmissionLink(s, readme.url),
+                      commentText: s.replace(ghImageTagsRE, "").replace(ghLinkRE, ""),
+                      videoLink: getGHLinks(s.replace(ghImageTagsRE, "")),
+                      imgLink: Core__Option.flatMap(getGHImageTags(s), (function (a) {
+                              return getGHLinks(a);
+                            })),
+                      rank: readme.challengeNumber === 2 ? 0 : i
+                    };
             });
+        return {
+                title: title,
+                challengeDescription: challengeDescription,
+                submissionComments: submissionComments,
+                url: readme.url,
+                challengeNumber: readme.challengeNumber
+              };
+      });
 }
 
 var make = App;

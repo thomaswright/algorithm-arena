@@ -1,3 +1,16 @@
+// Bindings
+
+@module("marked") external marked: string => Dom.document = "default"
+@module("marked") external parseMarked: string => string = "parse"
+
+type domParser = {parseFromString: (string, string) => Dom.document}
+
+@new external createDomParser: unit => domParser = "DomParser"
+
+@send external querySelector: (Dom.document, string) => Dom.element = "querySelector"
+
+//
+
 module Utils = {
   let substringBetween = (s, a, b) => {
     let lenA = a->String.length
@@ -67,7 +80,7 @@ module RegExpUtils = {
   }
 }
 
-type subCom = {
+type submissionComment = {
   url: string,
   challengeNumber: int,
   usernames: option<array<string>>,
@@ -75,6 +88,7 @@ type subCom = {
   commentText: string,
   videoLink: option<string>,
   imgLink: option<string>,
+  rank: int,
 }
 
 type readme = {
@@ -84,33 +98,38 @@ type readme = {
   challengeNumber: int,
 }
 
-@module("marked") external marked: string => Dom.document = "default"
-@module("marked") external parseMarked: string => string = "parse"
-
-type domParser = {parseFromString: (string, string) => Dom.document}
-
-@new external createDomParser: unit => domParser = "DomParser"
+type readmeDetail = {
+  title: Dom.element,
+  challengeDescription: Dom.element,
+  submissionComments: array<submissionComment>,
+  url: string,
+  challengeNumber: int,
+}
 
 @react.component
 let make = () => {
   let (readmes, setReadmes) = React.useState(() => [])
 
-  readmes->Array.map(readme => {
+  let readmeDetails = readmes->Array.map(readme => {
     let domParser = createDomParser()
 
     let contentDom = readme.content->parseMarked->domParser.parseFromString("text/html")
+
+    let title = contentDom->querySelector("h1")
+    let challengeDescription = contentDom->querySelector("p")
 
     let submissionComments =
       readme.content
       ->Utils.substringBetween("### Winner", "### Prizes")
       ->Option.getOr("")
       ->String.split("*")
-      ->Array.map(s => {
+      ->Array.mapWithIndex((s, i) => {
         open RegExpUtils
 
         {
           url: readme.url,
           challengeNumber: readme.challengeNumber,
+          rank: readme.challengeNumber == 2 ? 0 : i,
           usernames: s->getUsernames,
           submissionLink: s->getSubmissionLink(readme.url),
           imgLink: s
@@ -122,5 +141,15 @@ let make = () => {
           commentText: s->removeGHImageTags->removeGHLinks,
         }
       })
+
+    {
+      title,
+      challengeDescription,
+      submissionComments,
+      url: readme.url,
+      challengeNumber: readme.challengeNumber,
+    }
   })
+
+  // let submissionsByUser = readmeDetails -> Array.reduce( ())
 }
