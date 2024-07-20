@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect } from "react";
-import { marked, use } from "marked";
+import { marked } from "marked";
 import { Link, Route, useLocation } from "wouter";
 
 let routeBase = "/algorithm-arena";

@@ -21,10 +21,12 @@
     "marked": "^13.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "wouter": "^3.3.1",
-    "rescript": "^11.1.2"
+    "rescript": "^11.1.2",
+    "rescript-webapi": "^0.9.1",
+    "wouter": "^3.3.1"
   },
   "devDependencies": {
+    "@greenlabs/ppx-spice": "^0.2.1",
     "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.15",
     "gh-pages": "^6.1.1",

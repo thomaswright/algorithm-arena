@@ -15,11 +15,12 @@
   "suffix": ".res.mjs",
   "bs-dependencies": [
     "@rescript/core",
-    "@rescript/react"
+    "@rescript/react",
+    "rescript-webapi",
+    "@greenlabs/ppx-spice"
   ],
-  "bsc-flags": [
-    "-open RescriptCore"
-  ],
+  "bsc-flags": ["-open RescriptCore"],
+  "ppx-flags": [["@greenlabs/ppx-spice/ppx", "-uncurried"]],
   "jsx": {
     "version": 4
   }
