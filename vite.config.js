@@ -6,7 +6,7 @@ export default defineConfig({
   base: "https://thomaswright.github.io/algorithm-arena/",
   plugins: [
     react({
-      include: ["**/*.jsx"],
+      include: ["**/*.jsx", "**/*.mjs"],
     }),
   ],
 });
