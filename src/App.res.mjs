@@ -171,7 +171,7 @@ var placeNames = [
 ];
 
 function App$SubmissionList(props) {
-  var activeLink = props.activeLink;
+  var activeChallenge = props.activeChallenge;
   var remove = props.remove;
   var set = props.set;
   return JsxRuntime.jsx("div", {
@@ -183,21 +183,11 @@ function App$SubmissionList(props) {
                                     }),
                                 className: " w-fit text-sm font-bold cursor-pointer",
                                 onClick: (function (param) {
-                                    var match = submission.submissionLink;
-                                    if (activeLink !== undefined) {
-                                      if (match !== undefined) {
-                                        if (activeLink === match) {
-                                          return remove();
-                                        } else {
-                                          return set(submission);
-                                        }
-                                      } else {
-                                        return ;
-                                      }
-                                    } else if (match !== undefined) {
-                                      return set(submission);
+                                    var match = submission.challengeNumber;
+                                    if (activeChallenge !== undefined && activeChallenge === match) {
+                                      return remove();
                                     } else {
-                                      return ;
+                                      return set(submission);
                                     }
                                   })
                               }, Core__Option.getOr(submission.submissionLink, i.toString()));
@@ -693,8 +683,8 @@ function App(props) {
                                                                                   return Belt_MapString.remove(v, username);
                                                                                 });
                                                                           }),
-                                                                        activeLink: Core__Option.flatMap(Belt_MapString.get(commentsPerUser, username), (function (v) {
-                                                                                return v.submissionLink;
+                                                                        activeChallenge: Core__Option.map(Belt_MapString.get(commentsPerUser, username), (function (v) {
+                                                                                return v.challengeNumber;
                                                                               }))
                                                                       });
                                                           };

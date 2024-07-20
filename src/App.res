@@ -182,7 +182,7 @@ module SubmissionList = {
     ~username as _,
     ~set: submissionComment => unit,
     ~remove,
-    ~activeLink: option<string>,
+    ~activeChallenge: option<int>,
   ) => {
     <div
       className="my-1 mx-1 flex flex-row gap-1 px-2 rounded items-center flex-wrap min-w-20 max-w-32"
@@ -193,10 +193,9 @@ module SubmissionList = {
           key={submission.submissionLink->Option.getOr(i->Int.toString)}
           className=" w-fit text-sm font-bold cursor-pointer"
           onClick={_ => {
-            switch (activeLink, submission.submissionLink) {
-            | (Some(a), Some(s)) => a == s ? remove() : set(submission)
-            | (_, Some(s)) => set(submission)
-            | _ => ()
+            switch (activeChallenge, submission.challengeNumber) {
+            | (Some(a), s) => a == s ? remove() : set(submission)
+            | _ => set(submission)
             }
           }}>
           <span className="text-inherit">
@@ -211,7 +210,7 @@ module SubmissionList = {
 
 module Winner = {
   @react.component
-  let make = (~url, ~winner, ~active, ~set, ~remove) => {
+  let make = (~url as _, ~winner, ~active, ~set, ~remove) => {
     <div
       className="border rounded-full w-fit px-3 py-1 font-bold flex flex-row flex-wrap cursor-pointer"
       style={medalStyles[winner.rank]->Option.getOr({})}
@@ -552,9 +551,9 @@ let make = () => {
                 let renderSubmissionList = (index, submissions) =>
                   <SubmissionList
                     username={username}
-                    activeLink={commentsPerUser
+                    activeChallenge={commentsPerUser
                     ->Belt.Map.String.get(username)
-                    ->Option.flatMap(v => v.submissionLink)}
+                    ->Option.map(v => v.challengeNumber)}
                     set={comment =>
                       setCommentsPerUser(v => v->Belt.Map.String.set(username, comment))}
                     remove={() => setCommentsPerUser(v => v->Belt.Map.String.remove(username))}
