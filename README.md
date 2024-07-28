@@ -6,6 +6,12 @@ Currently at https://thomaswright.github.io/algorithm-arena/
 
 ## Dev
 
+Run the Rescript dev server:
+
+```sh
+npm run res:dev
+```
+
 Run the Vite dev server:
 
 ```sh
