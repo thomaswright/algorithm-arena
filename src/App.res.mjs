@@ -68,13 +68,13 @@ var Utils = {
   mapReduceWithIndex: mapReduceWithIndex
 };
 
-var escapeRE = new RegExp("\\[\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\", "g");
+var escapeRE = /\[\.\*\+\?\^\$\{\}\(\)\|\[\]\\/g;
 
 function $$escape(s) {
   return s.replace(escapeRE, "\\$&");
 }
 
-var usernameRE = new RegExp("(?<!\\/)(@([^\\s.,!?;:\\/)]+))", "g");
+var usernameRE = /(?<!\/)(@([^\s.,!?;:\/)]+))/g;
 
 function getUsernames(s) {
   return Core__Option.map(Caml_option.nullable_to_opt(s.match(usernameRE)), (function (a) {
@@ -802,4 +802,4 @@ export {
   make ,
   $$default as default,
 }
-/* escapeRE Not a pure module */
+/* ghLinkRE Not a pure module */

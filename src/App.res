@@ -90,14 +90,13 @@ module Utils = {
   }
 }
 module RegExpUtils = {
-  let escapeRE =
-    "\\[\\.\\*\\+\\?\\^\\$\\{\\}\\(\\)\\|\\[\\]\\\\"->RegExp.fromStringWithFlags(~flags="g")
+  let escapeRE = %re("/\[\.\*\+\?\^\$\{\}\(\)\|\[\]\\/g")
 
   let escape = s => {
     s->String.replaceRegExp(escapeRE, "\\$&")
   }
 
-  let usernameRE = "(?<!\\/)(@([^\\s.,!?;:\\/)]+))"->RegExp.fromStringWithFlags(~flags="g")
+  let usernameRE = %re("/(?<!\/)(@([^\s.,!?;:\/)]+))/g")
 
   let getUsernames = s => {
     s
