@@ -23,6 +23,27 @@ function repos_decode(v) {
   return Spice.arrayFromJson(Spice.stringFromJson, v);
 }
 
+function App$Attribution(props) {
+  return JsxRuntime.jsxs("div", {
+              children: [
+                JsxRuntime.jsx("span", {
+                      children: "By ",
+                      className: "font-normal text-gray-600"
+                    }),
+                JsxRuntime.jsx("a", {
+                      children: "Thomas Wright",
+                      className: "font-bold text-blue-600",
+                      href: "https://github.com/thomaswright/algorithm-arena"
+                    })
+              ],
+              className: "text-xs p-6"
+            });
+}
+
+var Attribution = {
+  make: App$Attribution
+};
+
 var Route = {};
 
 var Link = {};
@@ -764,17 +785,7 @@ function App(props) {
                             })
                       ]
                     }),
-                JsxRuntime.jsxs("div", {
-                      children: [
-                        "Website by ",
-                        JsxRuntime.jsx("a", {
-                              children: "Thomas Wright",
-                              className: "text-blue-500 font-medium",
-                              href: "https://github.com/thomaswright/algorithm-arena"
-                            })
-                      ],
-                      className: "text-slate-500 px-6 py-4 text-xs"
-                    })
+                JsxRuntime.jsx(App$Attribution, {})
               ],
               className: "bg-slate-100 text-slate-900 min-h-screen"
             });
@@ -787,6 +798,7 @@ var $$default = App;
 export {
   repos_encode ,
   repos_decode ,
+  Attribution ,
   Route ,
   Link ,
   SpecialCharacters ,

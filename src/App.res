@@ -46,6 +46,20 @@ type domParser = {parseFromString: (string, string) => Dom.document}
 
 @new external createDomParser: unit => domParser = "DOMParser"
 
+module Attribution = {
+  @react.component
+  let make = () => {
+    <div className="text-xs p-6">
+      <span className={"font-normal text-gray-600"}> {"By "->React.string} </span>
+      <a
+        className="font-bold text-blue-600"
+        href={"https://github.com/thomaswright/algorithm-arena"}>
+        {"Thomas Wright"->React.string}
+      </a>
+    </div>
+  }
+}
+
 module Route = {
   @module("wouter") @react.component
   external make: (~path: string, ~children: React.element) => React.element = "Route"
@@ -611,14 +625,7 @@ let make = () => {
         </div>
       </div>
     </Route>
-    <div className="text-slate-500 px-6 py-4 text-xs">
-      {"Website by "->React.string}
-      <a
-        className="text-blue-500 font-medium"
-        href={"https://github.com/thomaswright/algorithm-arena"}>
-        {"Thomas Wright"->React.string}
-      </a>
-    </div>
+    <Attribution />
   </div>
 }
 
